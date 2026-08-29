@@ -1,0 +1,43 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JSON válido
+        run: |
+          set -euo pipefail
+          find . -name '*.json' -not -path './.git/*' -print0 |
+            xargs -0 -I{} sh -c 'jq empty "{}" || { echo "JSON inválido: {}"; exit 1; }'
+
+      - name: Componentes na raiz do plugin, não em .claude-plugin/
+        run: |
+          set -euo pipefail
+          for d in hooks agents skills commands templates; do
+            if [ -d "plugins/governance/.claude-plugin/$d" ]; then
+              echo "ERRO: $d dentro de .claude-plugin/ não carrega"; exit 1
+            fi
+          done
+
+      - name: Sintaxe POSIX dos hooks
+        run: |
+          set -euo pipefail
+          for f in plugins/governance/hooks/*.sh; do
+            [ -e "$f" ] || continue
+            sh -n "$f" || { echo "sintaxe inválida: $f"; exit 1; }
+            [ -x "$f" ] || { echo "sem bit de execução: $f"; exit 1; }
+          done
+
+      - name: Links de ADR não quebrados
+        run: |
+          set -euo pipefail
+          grep -oh '(\(00[0-9][0-9]-[a-z-]*\.md\))' docs/adr/README.md |
+            tr -d '()' | while read -r f; do
+              [ -f "docs/adr/$f" ] || { echo "ADR ausente: $f"; exit 1; }
+            done

@@ -1,0 +1,19 @@
+{
+  "name": "agent-governance",
+  "owner": {
+    "name": "PedrodeAndradecf",
+    "url": "https://github.com/PedrodeAndradecf"
+  },
+  "metadata": {
+    "description": "Camada de imposição, fase e acúmulo para desenvolvimento assistido por agentes",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "governance",
+      "source": "./plugins/governance",
+      "description": "Guardas de propriedade, gate de definição de pronto, agentes com autoridade explícita e a regra de fronteira de três vias.",
+      "version": "0.1.0"
+    }
+  ]
+}
